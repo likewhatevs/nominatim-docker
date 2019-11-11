@@ -13,7 +13,7 @@ RUN apt-get -y update -qq && \
     postgresql-server-dev-11 postgresql-11-postgis-2.5 postgresql-contrib-11 \
     apache2 php php-pgsql libapache2-mod-php php-pear php-db \
     php-intl git curl sudo \
-    python3-pip libboost-python-dev \
+    python3-pip libboost-python-dev libluajit-5.1-dev \
     osmosis && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
@@ -29,7 +29,7 @@ RUN echo "host all  all    0.0.0.0/0  trust" >> /etc/postgresql/11/main/pg_hba.c
 ENV NOMINATIM_VERSION v3.3.0
 RUN git clone --recursive https://github.com/openstreetmap/Nominatim ./src
 RUN cd ./src && git checkout tags/$NOMINATIM_VERSION && git submodule update --recursive --init && \
-    mkdir build && cd build && cmake .. && make
+    mkdir build && cd build && cmake -D WITH_LUAJIT=ON .. && make
 
 # Osmium install to run continuous updates
 RUN pip3 install osmium

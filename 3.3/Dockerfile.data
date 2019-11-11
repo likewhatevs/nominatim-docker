@@ -1,0 +1,17 @@
+FROM nominatim:3.3 as builder
+
+RUN apt update && apt install aria2 -y
+
+RUN mkdir /data
+
+RUN cd /data && aria2c -x 16 -j 16 --split 16 --summary-interval=5 https://download.geofabrik.de/north-america-latest.osm.pbf
+
+COPY loadpostgresql.conf /etc/postgresql/11/main/postgresql.conf
+
+RUN /app/init.sh /data/north-america-latest.osm.pbf postgresdata 48
+
+FROM nominatim:3.3
+
+COPY --from=builder /data/postgresdata /var/lib/postgresql/11/main
+
+ENTRYPOINT [ "/app/start.sh" ]
